@@ -55,39 +55,57 @@ const Hero = () => {
 
     mm.add({
       isMobile: "(max-width: 767px), (max-height: 500px) and (orientation: landscape)",
+      isDesktop: "(min-width: 768px) and (min-height: 501px)",
     }, (context) => {
       const { isMobile } = context.conditions;
       const startValue = isMobile ? "top 50%" : "center 60%";
       const endValue = isMobile ? "120% top" : "bottom top";
 
       const video = videoRef.current;
+      if (!video) return;
+
       let targetTime = 0;
       let rafId;
 
       const updateVideo = () => {
-        if (video && Math.abs(video.currentTime - targetTime) >= 1 / 24) {
+        const d = video.duration;
+        if (!d || !isFinite(d)) return;
+
+        targetTime = self.progress * d;
+        if (Math.abs(video.currentTime - targetTime) >= 1 / 24) {
           video.currentTime = targetTime;
         }
         rafId = requestAnimationFrame(updateVideo);
       };
 
       ScrollTrigger.create({
-        trigger: ".video-wrapper",
+        trigger: video,
         start: startValue,
         end: endValue,
         scrub: true,
         pin: true,
-        pinType: "fixed",
-        anticipatePin: 1,
         onUpdate: (self) => {
-          targetTime = self.progress * video.duration;
+          const d = video.duration;
+          if (!d || !isFinite(d)) return;
+          targetTime = self.progress * d;
         },
       });
+
+      const onMetadataLoaded = () => {
+        ScrollTrigger.refresh();
+      };
+
+      if (video.readyState >= 1) {
+        ScrollTrigger.refresh();
+      } else {
+        video.addEventListener("loadedmetadata", onMetadataLoaded);
+      }
 
       rafId = requestAnimationFrame(updateVideo);
 
       return () => {
         cancelAnimationFrame(rafId);
+        video.removeEventListener("loadedmetadata", onMetadataLoaded);
       };
     });
   }, { scope: containerRef });
@@ -116,8 +134,8 @@ const Hero = () => {
   }, []);
 
   return (
-    <div ref={containerRef}>
-      <section id="home" className="noisy">
+    <div ref={containerRef} id="home">
+      <section id="hero" className="noisy">
         <h1 className="title">MOJITO</h1>
 
         <img
@@ -152,7 +170,7 @@ const Hero = () => {
         </div>
       </section>
 
-      <div className="video-wrapper relative h-[100svh] w-full overflow-hidden">
+      <div className="video absolute inset-0">
         <video
           ref={videoRef}
           muted

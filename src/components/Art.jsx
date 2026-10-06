@@ -11,6 +11,7 @@ const Art = () => {
 
     mm.add({
       isMobile: "(max-width: 767px), (max-height: 500px) and (orientation: landscape)",
+      isDesktop: "(min-width: 768px) and (min-height: 501px)",
     }, (context) => {
       const { isMobile } = context.conditions;
       const start = isMobile ? 'top 20%' : 'top top';

@@ -51,9 +51,13 @@ body {
 }
 
 @utility masked-img {
-    mask-image: url("/images/mask-img.png");
+    -webkit-mask-image: url("/images/mask-img.webp");
+    mask-image: url("/images/mask-img.webp");
+    -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
+    -webkit-mask-position: center;
     mask-position: center;
+    -webkit-mask-size: 50%;
     mask-size: 50%;
 }
 
